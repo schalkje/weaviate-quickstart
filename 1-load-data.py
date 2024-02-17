@@ -61,11 +61,11 @@ try:
     else:
         print("Collection already exists")
 
-        # validate if the data is already loaded by printing the first 5 objects
-        questions = client.collections.get("Question")
-        response = questions.query.fetch_objects(limit=30)
-        for obj in response.objects:
-            print(obj.properties)
+    # validate if the data is already loaded by printing the first 5 objects
+    questions = client.collections.get("Question")
+    response = questions.query.fetch_objects(limit=30)
+    for obj in response.objects:
+        print(obj.properties)
 
 
 finally:

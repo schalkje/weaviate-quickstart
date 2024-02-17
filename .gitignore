@@ -1,2 +1,7 @@
+# Exclude local configuration folders
 .venv
 .vscode
+
+# Exclude data folders from weaviate
+data
+backups
