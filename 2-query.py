@@ -23,6 +23,11 @@ try:
         filters=wvc.query.Filter.by_property("category").equal("ANIMALS"),
     )
 
+    # if no objects are found, the response will be empty, notify the user and finish the script
+    if len(response.objects) == 0:
+        print("No objects found")
+        exit()
+
     # loop over all objects in the response
     for obj in response.objects:
         print(obj.properties)

@@ -13,7 +13,9 @@ client = weaviate.connect_to_custom(
 )
 
 try:
-    # Wrap in try/finally to ensure client is closed gracefully
+    response = client.get_meta()
+    print(response)
+
     pass  # Add an indented block of code here if needed
 
 finally:

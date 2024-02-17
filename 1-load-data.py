@@ -15,30 +15,58 @@ client = weaviate.connect_to_custom(
 )
 
 try:
-    # Wrap in try/finally to ensure client is closed gracefully
-    questions = client.collections.create(
-        name="Question",
-        vectorizer_config=wvc.config.Configure.Vectorizer.text2vec_openai(),  # If set to "none" you must always provide vectors yourself. Could be any other "text2vec-*" also.
-        generative_config=wvc.config.Configure.Generative.openai(),  # Ensure the `generative-openai` module is used for generative queries
-    )
+    # check if there are already collections in the Weaviate instance, if yes, disply them
+    collections = client.collections.list_all(True)
+    if len(collections) > 0:
+        print("Collections in Weaviate instance:")
+        for collection in collections:
+            print("- " + collection)
+    else:
+        print("No collections in Weaviate instance")
 
-    resp = requests.get(
-        "https://raw.githubusercontent.com/weaviate-tutorials/quickstart/main/data/jeopardy_tiny.json"
-    )
-    data = json.loads(resp.text)  # Load data
+    # remove the collection "Question" if it already exists
+    # if "Question" in client.collections.list_all(True):
+    #     client.collections.delete("Question")
+    #     print("Collection 'Question' deleted")
+    # else:
+    #     print("Collection 'Question' does not exist")
 
-    question_objs = list()
-    for i, d in enumerate(data):
-        question_objs.append(
-            {
-                "answer": d["Answer"],
-                "question": d["Question"],
-                "category": d["Category"],
-            }
+    # validate if the collection exists, if not, create it
+    if "Question" not in client.collections.list_all(True):
+        questions = client.collections.create(
+            name="Question",
+            vectorizer_config=wvc.config.Configure.Vectorizer.text2vec_openai(),  # If set to "none" you must always provide vectors yourself. Could be any other "text2vec-*" also.
+            generative_config=wvc.config.Configure.Generative.openai(),  # Ensure the `generative-openai` module is used for generative queries
         )
 
-    questions = client.collections.get("Question")
-    questions.data.insert_many(question_objs)  # This uses batching under the hood
+        resp = requests.get(
+            "https://raw.githubusercontent.com/weaviate-tutorials/quickstart/main/data/jeopardy_tiny.json"
+        )
+        data = json.loads(resp.text)  # Load data
+
+        question_objs = list()
+        for i, d in enumerate(data):
+            question_objs.append(
+                {
+                    "answer": d["Answer"],
+                    "question": d["Question"],
+                    "category": d["Category"],
+                }
+            )
+
+        questions = client.collections.get("Question")
+        questions.data.insert_many(question_objs)  # This uses batching under the hood
+
+        print("Collection created and data loaded")
+    else:
+        print("Collection already exists")
+
+        # validate if the data is already loaded by printing the first 5 objects
+        questions = client.collections.get("Question")
+        response = questions.query.fetch_objects(limit=30)
+        for obj in response.objects:
+            print(obj.properties)
+
 
 finally:
     client.close()  # Close client gracefully
