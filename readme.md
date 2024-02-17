@@ -1,3 +1,8 @@
+# Weaviate quick start
+https://weaviate.io/developers/weaviate/quickstart
+
+
+
 # Testing Weaviate running in a container
 
 http://localhost:8080/v1
